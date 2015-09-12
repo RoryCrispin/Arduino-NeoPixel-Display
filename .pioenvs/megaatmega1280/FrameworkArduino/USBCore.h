@@ -1,0 +1,1 @@
+/root/.platformio/packages/framework-arduinoavr/cores/arduino/USBCore.h
