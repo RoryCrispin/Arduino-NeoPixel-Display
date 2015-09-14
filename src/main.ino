@@ -1,7 +1,9 @@
 #include <Adafruit_NeoPixel.h>
+#include <neoColour.h>
 
 #define PIN             3
 #define NUMPIXELS       150
+#define array_length(x)(sizeof(x)/sizeof(*x)) //Returns the number of items in array
 
 int strobePin  = 2;    // Strobe Pin on the MSGEQ7
 int resetPin   = 1;    // Reset Pin on the MSGEQ7
@@ -10,10 +12,26 @@ int level[7];          // An array to hold the values from the 7 frequency bands
 int msgPercentage[7];
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-int modes[];
-int filters[];
+int modes[5] = {0};
+int filters[5];
 
 
+// Mode Global Vars
+// (I hate writing non OO code as much as you hate reading it)
+// I am so sorry
+
+// --: mode_spin
+int rotation_index = 0;
+
+
+void setFullStrip(uint32_t colour, boolean show=false){
+	for (int i = 0; i<NUMPIXELS;i++){	
+		pixels.setPixelColor(i, colour);
+	}
+	if(show){
+		pixels.show();
+	}
+}
 void setup() {
 	pixels.begin();
 	// Define our pin modes
@@ -31,23 +49,16 @@ void setup() {
 	digitalWrite (resetPin,  LOW);
 	digitalWrite (strobePin, HIGH);
 	delay        (1);
-	setFullStrip(pixels.Color(255,0,0));
+	setFullStrip(pixels.Color(255,0,0), true);
 	delay(10);
-	setFullStrip(pixels.Color(0,0,0));
+	setFullStrip(pixels.Color(0,0,0), true);
 	delay(10);
 }
 
-void setFullStrip(uint32_t colour){
-	for (int i = 0; i<NUMPIXELS;i++){	
-		pixels.setPixelColor(i, colour);
-	}
-	pixels.show();
-}
 
 void clear_pixels(){
 	setFullStrip(pixels.Color(0,0,0));
 }
-
 void loop() {
 	readMSG();
 	calc_msg_percentage();
@@ -63,15 +74,26 @@ void loop() {
 	//
 	// *-----------------*
 	uint32_t primaryColour = pixels.Color(255,0,0);
-	uint32_t secondaryColour = pixels.Color(0,0,0);
+	uint32_t secondaryColour = pixels.Color(0,0,255);
 
-	for (int i = 0; i< sizeof(modes); i++){
-		switch (modes[i]):
+	modes[0] = 2;
+	for (int i = 0; i< array_length(modes); i++){
+		switch (modes[i]){
 			case 0:
-				view_spectrum(primaryColour, secondaryColour);
 				break;		
-	}	
+			case 1:
+				view_spectrum(primaryColour, secondaryColour);
+				break;
+			case 2:
+				mode_spin(primaryColour, secondaryColour);
+				break;
+			case 3:
+				setFullStrip(pixels.Color(100,100,255), true);
+				break;
+	}	}
 	pixels.show();
+	
+//	neoColour::init(255,255,255);
 }
 
 
@@ -84,9 +106,56 @@ void view_spectrum(uint32_t primaryColour, uint32_t secondaryColour){
 
 }
 
+void mode_spin(uint32_t primaryColour, uint32_t secondaryColour){
+	int halfpoint = NUMPIXELS/2;
+	boolean pixel_is_primary[NUMPIXELS]; 	// To save memory, represent primary colour
+	// by true and secondaryColour as false in
+	// intermediate arrays for the rotation function.
+
+	for (int i = 0; i<NUMPIXELS;i++){
+		// We know that our array is the same length as NUMPIXELS
+		// So why calculate the length again with array_length();
+		// when we can use NUMPIXELS 
+
+		if (i<halfpoint){
+			pixel_is_primary[i] = true;
+		} else {
+			pixel_is_primary[i] = false;
+		}
+	}
+
+	for (int i = 0; i<rotation_index;i++){
+		for (int i = 0; i<NUMPIXELS;i++){
+
+		boolean firstItem = pixel_is_primary[0];
+			pixel_is_primary[i] = pixel_is_primary[i+1];
+
+		pixel_is_primary[NUMPIXELS] = firstItem;
+		}
+	}
+
+	for (int i = 0; i<NUMPIXELS;i++){
+		// We know that our array is the same length as NUMPIXELS
+		// So why calculate the length again with array_length();
+		// when we can use NUMPIXELS 
+
+		if (pixel_is_primary[i]){
+			pixels.setPixelColor(i, primaryColour);
+		} else {
+			pixels.setPixelColor(i, secondaryColour);
+		}
+	}
+		rotation_index = rotation_index + 1;
+		delay(10);
+		if (rotation_index == NUMPIXELS){
+			rotation_index = 0;
+		}
+
+}
 
 uint32_t colour_with_intensity(uint32_t, int intensity_percentage){
-	return pixels.Color()
+	//return pixels.Color()
+	return 0;
 }
 
 
@@ -105,3 +174,6 @@ void calc_msg_percentage(){
 		msgPercentage[i] = map(level[i],0,1000,0,100);
 	}
 }
+
+
+
