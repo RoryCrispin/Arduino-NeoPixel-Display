@@ -10,4 +10,5 @@
  .pioenvs/megaatmega1280/FrameworkArduino/USBAPI.h \
  .pioenvs/megaatmega1280/FrameworkArduino/Arduino.h \
  .pioenvs/megaatmega1280/FrameworkArduinoVariant/pins_arduino.h \
- .pioenvs/megaatmega1280/Adafruit_NeoPixel_ID28/Adafruit_NeoPixel.h
+ .pioenvs/megaatmega1280/Adafruit_NeoPixel_ID28/Adafruit_NeoPixel.h \
+ .pioenvs/megaatmega1280/neoColour/neoColour.h

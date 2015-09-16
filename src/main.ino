@@ -31,6 +31,8 @@ int filters[5];
 //
 
 // --| AudioAnalytics
+int level_delta[7]; // Store the delta of each block over 
+boolean newBeat();  // True if a new beat is detected
 
 
 // --| mode_spin
@@ -115,8 +117,8 @@ void loop() {
 	// 0	spin
 	//
 	// *-----------------*
-	uint32_t primaryColour = pixels.Color(255,0,0);
-	uint32_t secondaryColour = pixels.Color(0,0,255);
+	uint32_t primaryColour = pixels.Color(50,0,0);
+	uint32_t secondaryColour = pixels.Color(0,0,55);
 
 	modes[0] = 2;
 	for (int i = 0; i< array_length(modes); i++){
@@ -163,7 +165,7 @@ uint32_t colour_with_intensity(uint32_t, int intensity_percentage){
 
 void view_spectrum(uint32_t primaryColour, uint32_t secondaryColour){
 	for (int i = 0; i<NUMPIXELS;i++){
-		if (i<level[0]/8){
+		if (i<level[0][0]/8){
 			pixels.setPixelColor(i, pixels.Color(255,0,100));	
 		}
 	}
@@ -194,18 +196,24 @@ void mode_spin(uint32_t primaryColour, uint32_t secondaryColour){
 	}
 }
 
+void AudioAnalytics(){
+
+	for//TODO I was working on audio analytics when I left off here :)  
+
+}
+
 
 void readMSG(){
 
-//	for (int i = 2; i>0;i--){ //Shift the arrays positions backwards in history 
-//		for (int l_pos = 0; i < 7; i++) {
-//			level[i][l_pos] = level[i-1][l_pos];
-//		}
-//	} 
-	for (int i = 0; i < 7; i++) {
+	for (int i = 2; i-->1;){ //Shift the arrays positions backwards in history 
+		for (int l_pos = 0; l_pos < 7; l_pos++) {
+			level[i][l_pos] = level[i-1][l_pos];
+		}
+	} 
+	for (int i = 0; i < 7; i++) { // Read new values from ADC and place them in the 0th position 
 		digitalWrite       (strobePin, LOW);
 		delayMicroseconds  (100);                    // Delay necessary due to timing diagram
-		level[0] =         analogRead (outPin);
+		level[0][0] =         analogRead (outPin);
 		digitalWrite       (strobePin, HIGH);
 		delayMicroseconds  (100);                    // Delay necessary due to timing diagram  
 	}    
@@ -213,7 +221,7 @@ void readMSG(){
 
 void calc_msg_percentage(){
 	for (int i = 0; i<7; i++){
-		msgPercentage[i] = map(level[i],0,1000,0,100);
+		msgPercentage[i] = map(level[0][i],0,1000,0,100);
 	}
 }
 
