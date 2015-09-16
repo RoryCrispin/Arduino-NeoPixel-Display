@@ -8,9 +8,11 @@
 int strobePin  = 2;    // Strobe Pin on the MSGEQ7
 int resetPin   = 1;    // Reset Pin on the MSGEQ7
 int outPin     = A0;   // Output Pin on the MSGEQ7
-int level[7][3];       // An array to hold the values from the 7 frequency bands. 
+int level[3][7]; 	       // An array to hold the values from the 7 frequency bands. 
 // Where levels[n][0] is the latest reading and [n][2] is the oldest stored reading.
 
+
+int xoyo[5][5];
 int msgPercentage[7];
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -161,7 +163,7 @@ uint32_t colour_with_intensity(uint32_t, int intensity_percentage){
 
 void view_spectrum(uint32_t primaryColour, uint32_t secondaryColour){
 	for (int i = 0; i<NUMPIXELS;i++){
-		if (i<level[0][0]/8){
+		if (i<level[0]/8){
 			pixels.setPixelColor(i, pixels.Color(255,0,100));	
 		}
 	}
@@ -195,15 +197,15 @@ void mode_spin(uint32_t primaryColour, uint32_t secondaryColour){
 
 void readMSG(){
 
-	for (int i = 2; i>0;i--){ //Shift the arrays positions backwards in history 
-		for (int l_pos = 0; i < 7; i++) {
-			level[i][l_pos] = level[i-1][l_pos];
-		}
-	} 
+//	for (int i = 2; i>0;i--){ //Shift the arrays positions backwards in history 
+//		for (int l_pos = 0; i < 7; i++) {
+//			level[i][l_pos] = level[i-1][l_pos];
+//		}
+//	} 
 	for (int i = 0; i < 7; i++) {
 		digitalWrite       (strobePin, LOW);
 		delayMicroseconds  (100);                    // Delay necessary due to timing diagram
-		level[0][i] =         analogRead (outPin);
+		level[0] =         analogRead (outPin);
 		digitalWrite       (strobePin, HIGH);
 		delayMicroseconds  (100);                    // Delay necessary due to timing diagram  
 	}    
@@ -211,7 +213,7 @@ void readMSG(){
 
 void calc_msg_percentage(){
 	for (int i = 0; i<7; i++){
-		msgPercentage[i] = map(level[0][i],0,1000,0,100);
+		msgPercentage[i] = map(level[i],0,1000,0,100);
 	}
 }
 
