@@ -32,10 +32,11 @@ int filters[5];
 
 // --| AudioAnalytics
 int level_delta[7]; // Store the delta of each block over 
-boolean newBeat();  // True if a new beat is detected
-
+boolean newBeat;  // True if a new beat is detected
+int audio_volume;
 
 // --| mode_spin
+boolean rotate_clockwise = false;
 int rotation_index = 20;
 boolean spin_bool_array[NUMPIXELS] = {0}; 
 // To save memory, represent primary colour
@@ -176,7 +177,7 @@ void mode_spin(uint32_t primaryColour, uint32_t secondaryColour){
 	memcpy(spin_bool_array, starting_spin_array, sizeof(spin_bool_array));
 	//spin_bool_array = starting_spin_array;
 	for (int i = 0; i<=rotation_index;i++){
-		rotate_bool_array(false);
+		rotate_bool_array(rotate_clockwise);
 	}
 	
 	for (int i = 0; i<NUMPIXELS;i++){
@@ -197,10 +198,30 @@ void mode_spin(uint32_t primaryColour, uint32_t secondaryColour){
 }
 
 void AudioAnalytics(){
-
-	for//TODO I was working on audio analytics when I left off here :)  
+	calc_audio_volume();
+	newBeat = beatDetect();
+	
 
 }
+
+void calc_audio_volume(){
+	audio_volume = 0;
+	for (int i = 0; i <7; i++){
+		audio_volume = audio_volume + level[0][i];		
+	}
+	audio_volume = audio_volume /7;
+}
+
+bool beatDetect(){
+	if (level[0][3] > 40 ){
+		return true;
+	} else {
+		return false;
+	}
+
+}
+
+
 
 
 void readMSG(){
